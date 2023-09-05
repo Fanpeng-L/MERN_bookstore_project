@@ -13,14 +13,16 @@ app.get("/", (request, response) => {
   return response.status(200).send("Welcome");
 });
 
-// Route for adding a new book:
+// Route for creating a new book:
 app.post("/books", async (request, response) => {
   try {
+    //If any of these fields are missing, it returns a 400 response with a JSON error message
     if (!request.body.title || !request.body.author || !request.body.publishYear) {
       return response
         .status(400)
         .send({ message: "Send all required fields: title, author, publishYear" });
     }
+    //If the validation passes, creates a new book object:
     const newBook = {
       title: request.body.title,
       author: request.body.author,
@@ -76,6 +78,21 @@ app.put("/books/:id", async (request, response) => {
     return response.status(200).send({ message: "Book updated successfully." });
   } catch (error) {
     console.log(error.message);
+    response.status(500).send({ message: error.message });
+  }
+});
+
+// Route for deleting a book:
+app.delete("/books/:id", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const result = await Book.findByIdAndDelete(id);
+    if (!result) {
+      return response.status(404).json({ message: "Book not found." });
+    }
+    return response.status(200).send({ message: "Book deleted successfully." });
+  } catch (error) {
+    console.log({ message: error.message });
     response.status(500).send({ message: error.message });
   }
 });
